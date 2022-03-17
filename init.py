@@ -1,35 +1,33 @@
 from Graph import Graph
 from Lien import Lien
-from Node import Node
-from Link import Link
 from Demand import Demand
 from Noeud import Noeud
 
-def createNodesFromFile(filename):
-    file = open(filename,'r')
-    lines = file.readlines()
+# def createNodesFromFile(filename):
+#     file = open(filename,'r')
+#     lines = file.readlines()
 
-    nodesList = []
+#     nodesList = []
 
-    for i in range(8,33):
-        line = lines[i].split(" ")
-        nodeToAdd = Noeud(line[2], line[4], line[5])
-        nodesList.append(nodeToAdd)
+#     for i in range(8,33):
+#         line = lines[i].split(" ")
+#         nodeToAdd = Noeud(line[2], line[4], line[5])
+#         nodesList.append(nodeToAdd)
 
-    return nodesList
+#     return nodesList
 
-def createLinksFromFile(filename):
-    file = open(filename,'r')
-    lines = file.readlines()
+# def createLinksFromFile(filename):
+#     file = open(filename,'r')
+#     lines = file.readlines()
 
-    linksList = []
+#     linksList = []
 
-    for i in range(40,85):
-        line = lines[i].split(" ")
-        linkToAdd = Link(line[2],line[4],line[5],line[7],line[8],line[9],line[10],line[12],line[13])
-        linksList.append(linkToAdd)
+#     for i in range(40,85):
+#         line = lines[i].split(" ")
+#         linkToAdd = Lien(line[2],line[4],line[5],line[7],line[8],line[9],line[10],line[12],line[13])
+#         linksList.append(linkToAdd)
     
-    return linksList
+#     return linksList
 
 def createDemandsFromFile(filename):
     file = open(filename,'r')
