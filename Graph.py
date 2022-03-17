@@ -8,6 +8,7 @@ class Graph:
         self.__nbNoeuds = 0
         self.__noeuds = {}
         self.__liens = {}
+        self.__demands = {}
 
     def getNbNoeuds(self):
         return self.__nbNoeuds
@@ -20,6 +21,9 @@ class Graph:
         self.__liens[lien.getId()] = lien
         lien.getSource().ajoutIdentifiantLien(lien.getId())
         lien.getDestination().ajoutIdentifiantLien(lien.getId())
+
+    def ajoutDemande(self, demande):
+        self.__demands[demande.getId()] = demande
 
     def obtenirProchainsNoeuds(self, id):
         dictionnaire = {}
@@ -53,6 +57,12 @@ class Graph:
     def getNoeud(self, id):
         return self.__noeuds[id]
 
+    def getTotalCost(self):
+        sum = 0
+        for lien in self.__liens.values():
+            sum += lien.getCost()
+        return sum
+
     def dijkstra(self, sourceNode, destNode):
         assert sourceNode in self.__noeuds, 'such source node does not exist'
         assert destNode in self.__noeuds, 'such destination node does not exist'
@@ -83,3 +93,21 @@ class Graph:
         path.append(current_node)
         path.reverse()
         return path
+
+
+    def glouton(self):
+        for demand_key, demand_value in self.__demands.items():
+            path = self.dijkstra(demand_value.getSource(), demand_value.getTarget())
+            for i in range(0,len(path)-1):
+                # print("--- New link ---")
+                linkid = "Link"+path[i]+"_"+path[i+1]
+                linkidAlt = "Link"+path[i+1]+"_"+path[i]
+                if linkid in self.__liens:
+                    # self.__liens[linkid].__str__() 
+                    self.__liens[linkid].addToCapacity(float(demand_value.getDemandValue())) 
+                    # self.__liens[linkid].__str__() 
+                elif linkidAlt in self.__liens:
+                    # self.__liens[linkidAlt].__str__() 
+                    self.__liens[linkidAlt].addToCapacity(float(demand_value.getDemandValue()))   
+                    # self.__liens[linkidAlt].__str__()
+        return self.getTotalCost()
