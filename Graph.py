@@ -24,11 +24,21 @@ class Graph:
     def obtenirProchainsNoeuds(self, id):
         dictionnaire = {}
         for element in self.__liens.values():
-            if element.getSource() == id:
-                dictionnaire[element.getDestination()] = element.getDestination()
+            if element.getSource().getId() == id:
+                dictionnaire[element.getDestination().getId()] = element.getDestination()
             else:
-                if element.getDestination() == id:
-                    dictionnaire[element.getSource()] = element.getSource()
+                if element.getDestination().getId() == id:
+                    dictionnaire[element.getSource().getId()] = element.getSource()
+        return dictionnaire
+
+    def obtenirLiensVoisins(self, id):
+        dictionnaire = {}
+        for element in self.__liens.values():
+            if element.getSource().getId() == id:
+                dictionnaire[element.getDestination().getId()] = element
+            else:
+                if element.getDestination().getId() == id:
+                    dictionnaire[element.getSource().getId()] = element
         return dictionnaire
 
     def __str__(self):
@@ -44,65 +54,32 @@ class Graph:
         return self.__noeuds[id]
 
     def dijkstra(self, sourceNode, destNode):
-        """Recherche du plus court chemin dans le graphe entre deux noeuds dont les identifiants sont passés en paramètre"""
-        assert sourceNode in self.__noeuds, 'such source node does not exist'
-        assert destNode in self.__noeuds, 'such destination node does not exist'
-
-        inf = float('inf')
-
-        setupCosts = {node: inf for node in self.__noeuds}
-        previous_nodes = {
-            node: None for node in self.__noeuds
-        }
-        setupCosts[sourceNode] = 0
-
-        nddict = self.__noeuds.copy()
-        nodes = set()
-        for nd in nddict.keys():
-            nodes.add(nd)
-
-        while nodes:
-
-            current_node = min(nodes, key=lambda node: setupCosts[node])
-            print(nodes)
-            # if setupCosts[current_node] == inf:
-            #     break
-
-            for neighbour, cost in self.obtenirProchainsNoeuds(current_node).items():
-                alternative_route = setupCosts[current_node] + cost
-
-                if alternative_route < setupCosts[neighbour]:
-                    setupCosts[neighbour] = alternative_route
-                    previous_nodes[neighbour] = current_node
-
-            nodes.remove(current_node)
-
-        path, current_node = deque(), destNode
-        while previous_nodes[current_node] is not None:
-            path.appendleft(current_node)
-            current_node = previous_nodes[current_node]
-        if path:
-            path.appendleft(current_node)
-        return path
-
-    def dijkstra2(self, sourceNode, destNode):
-        """Recherche du plus court chemin dans le graphe entre deux noeuds dont les identifiants sont passés en paramètre"""
         assert sourceNode in self.__noeuds, 'such source node does not exist'
         assert destNode in self.__noeuds, 'such destination node does not exist'
 
         inf = float('inf')
         setupCosts = {node: inf for node in self.__noeuds}
         setupCosts[sourceNode] = 0
-
-        # previous_nodes = {
-        #     node: None for node in self.__noeuds
-        # }
 
         nodesCopy = self.__noeuds.copy()
-        # nodesIds = []
-        # for node in nodesCopy:
-        #     print(node)
-        #     nodesIds.append(node)
+
+        path = []
+        previousNodes = {node: None for node in self.__noeuds}
 
         while nodesCopy:
-            print(nodesCopy)
+            current_node = min(nodesCopy, key=lambda node: setupCosts[node])
+            # path.append(current_node)
+            del nodesCopy[current_node]
+            liensVoisins = self.obtenirLiensVoisins(current_node)
+            minSetupCost = inf
+            for key, value in liensVoisins.items():
+                if setupCosts[current_node] + value.getSetupCost() < setupCosts[key]:
+                    setupCosts[key] = setupCosts[current_node] + value.getSetupCost()
+                    previousNodes[key] = current_node
+        current_node = destNode
+        while previousNodes[current_node] is not None:
+            path.append(current_node)
+            current_node = previousNodes[current_node]
+        path.append(current_node)
+        path.reverse()
+        return path
