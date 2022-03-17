@@ -29,7 +29,9 @@ class Lien:
         self.__capacity += capacity
     
     def getCost(self):
-        if self.__capacity <= 200:
+        if self.__capacity == 0:
+            return 0
+        elif self.__capacity <= 200:
             return self.__setupCost + 2*self.__setupCost
         elif self.__capacity <= 800:
             return 8*self.__setupCost*0.9
@@ -37,11 +39,10 @@ class Lien:
             return 16*self.__setupCost*0.85
         elif self.__capacity <= 3200:
             return 32*self.__setupCost*0.75
-        elif self.__capacity <= 6400:
-            return 32*self.__setupCost*0.75*2
-        elif self.__capacity <= 12800:
-            return 32*self.__setupCost*0.75*4
-        elif self.__capacity <= 25600:
-            return 32*self.__setupCost*0.75*8
-        elif self.__capacity <= 51200:
-            return 32*self.__setupCost*0.75*16
+        elif self.__capacity > 3200:
+            q = self.__capacity // 3200
+            r = self.__capacity%3200
+            if r == 0:
+                return 32*self.__setupCost*0.75*q
+            else:
+                return 32*self.__setupCost*0.75*(q+1)
