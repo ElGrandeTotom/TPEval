@@ -1,0 +1,15 @@
+Demande : Origine, destination, volume => Matrice de trafic
+
+Flot : Multi-routage d'une demande dans le réseau
+
+Capacité : Valeur sur un lien (ou arc) qui met une borne supérieure sur le volume de multi-flot qui passe dans ce lien
+
+
+Inputs : - Fonctions de cout en fonction des capacités
+	 - Matrice de trafic
+	 - Forme du réseau de transport
+
+Ouputs : - Capacités installées sur chaque lien de chaque module
+	 - Multi-routage du multiflot dans le réseau de transport
+
+Solution réalisable : Un ensemble de modules de capacité installés permettant le routage de l'ensemble du trafic
