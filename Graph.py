@@ -3,6 +3,7 @@ from collections import deque
 from copy import deepcopy
 from sys import path
 
+
 class Graph:
 
     def __init__(self, id):
@@ -55,7 +56,6 @@ class Graph:
         for value in self.__liens.values():
             value.__str__()
 
-
     def getNoeud(self, id):
         return self.__noeuds[id]
 
@@ -69,11 +69,11 @@ class Graph:
         copyLinks = deepcopy(self.__liens)
 
         cost = 0
-        for j in range(0, len(p)-1):
+        for j in range(0, len(p) - 1):
             node1 = p[j]
-            node2 = p[j+1]
-            linkid = "Link"+node1+"_"+node2
-            linkidAlt = "Link"+node2+"_"+node1
+            node2 = p[j + 1]
+            linkid = "Link" + node1 + "_" + node2
+            linkidAlt = "Link" + node2 + "_" + node1
             if linkid in copyLinks:
                 cost += float(copyLinks[linkid].getSetupCost())
             elif linkidAlt in copyLinks:
@@ -81,28 +81,24 @@ class Graph:
 
         return cost
 
-
     def dijkstra(self, sourceNode, destNode):
-
         nodesCopy = deepcopy(self.__noeuds)
-
         assert sourceNode in nodesCopy, 'such source node does not exist'
         assert destNode in nodesCopy, 'such destination node does not exist'
+
+        path = []
 
         inf = float('inf')
         setupCosts = {node: inf for node in nodesCopy}
         setupCosts[sourceNode] = 0
 
-        path = []
         previousNodes = {node: None for node in nodesCopy}
 
         while nodesCopy:
             current_node = min(nodesCopy, key=lambda node: setupCosts[node])
             del nodesCopy[current_node]
             liensVoisins = self.obtenirLiensVoisins(current_node)
-            minSetupCost = inf
             for key, value in liensVoisins.items():
-                # print(setupCosts)
                 if setupCosts[current_node] + value.getSetupCost() < setupCosts[key]:
                     setupCosts[key] = setupCosts[current_node] + value.getSetupCost()
                     previousNodes[key] = current_node
@@ -114,63 +110,64 @@ class Graph:
         path.reverse()
         return path
 
-
     def glouton(self):
         for demand_key, demand_value in self.__demands.items():
             path = self.dijkstra(demand_value.getSource(), demand_value.getTarget())
-            for i in range(0,len(path)-1):
-                linkid = "Link"+path[i]+"_"+path[i+1]
-                linkidAlt = "Link"+path[i+1]+"_"+path[i]
+            for i in range(0, len(path) - 1):
+                linkid = "Link" + path[i] + "_" + path[i + 1]
+                linkidAlt = "Link" + path[i + 1] + "_" + path[i]
                 if linkid in self.__liens:
-                    self.__liens[linkid].addToCapacity(float(demand_value.getDemandValue())) 
+                    self.__liens[linkid].addToCapacity(float(demand_value.getDemandValue()))
                 elif linkidAlt in self.__liens:
-                    self.__liens[linkidAlt].addToCapacity(float(demand_value.getDemandValue()))   
+                    self.__liens[linkidAlt].addToCapacity(float(demand_value.getDemandValue()))
         return self.getTotalCost()
 
     def yen(self, sourceNode, destNode, K):
         copyNodes = deepcopy(self.__noeuds)
         copyLinks = deepcopy(self.__liens)
 
-        A = []
-        A.append(self.dijkstra(sourceNode, destNode))
+        A = [self.dijkstra(sourceNode, destNode)]
+
         B = []
 
         for k in range(1, K):
-            for i in range(0, len(A[k-1])-2):
+            for i in range(0, len(A[k - 1]) - 2):
 
-                spurNode = A[k-1][i]
-                rootPath = A[k-1][0:i+1]
+                spurNode = A[k - 1][i]
+                rootPath = A[k - 1][0:i]
 
                 for p in A:
-                    if rootPath == p[0:i+1] and len(rootPath) >=2:
-                        for j in range(0, len(rootPath)-1):
-                            node1 = rootPath[j]
-                            node2 = rootPath[j+1]
-                            linkid = "Link"+node1+"_"+node2
-                            linkidAlt = "Link"+node2+"_"+node1
-                            if linkid in copyLinks:
-                                del copyLinks[linkid]
-                            elif linkidAlt in copyLinks:
-                                del copyLinks[linkidAlt]
-                
+                    if rootPath == p[0:i]:
+                        node1 = p[i]
+                        node2 = p[i + 1]
+                        linkid = "Link" + node1 + "_" + node2
+                        linkidAlt = "Link" + node2 + "_" + node1
+                        if linkid in self.__liens:
+                            del self.__liens[linkid]
+                        elif linkidAlt in self.__liens:
+                            del self.__liens[linkidAlt]
+
                 for node in rootPath:
                     if node != spurNode:
-                        del copyNodes[node]
-                
+                        liensVoisins = self.obtenirLiensVoisins(node)
+                        for key, lien in liensVoisins.items():
+                            del self.__liens[lien.getId()]
+                        del self.__noeuds[node]
+
                 spurPath = self.dijkstra(spurNode, destNode)
-                
-                totalPath = rootPath + spurPath[1:]
+                totalPath = rootPath + spurPath
 
                 if totalPath not in B:
                     B.append(totalPath)
 
-                copyNodes = deepcopy(self.__noeuds)
-                copyLinks = deepcopy(self.__liens)
-            
-            if len(B)==0:
+                self.__noeuds = deepcopy(copyNodes)
+                self.__liens = deepcopy(copyLinks)
+
+            if len(B) == 0:
+                # A verif
                 break
 
-            costMin=float('inf')
+            costMin = float('inf')
             minPath = []
             for p in B:
                 cost = self.getCostOfPath(p)
@@ -179,5 +176,7 @@ class Graph:
                     minPath = p
 
             A.append(minPath)
+
+            B.remove(minPath)
 
         return A

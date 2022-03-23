@@ -1,5 +1,4 @@
 class Noeud:
-
     def __init__(self, id):
         self.__id = id
         self.__liens = list()
